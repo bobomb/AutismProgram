@@ -1,0 +1,1 @@
+"./HAL/hal_pmm.obj" "./HAL/RfRegSettings.obj" "./HAL/RF1A.obj" "./RadioControl.obj" "./Button.obj" "./AutismProgram.obj" "../lnk_cc430f6137.cmd" -l"libmath.a" -l"libc.a" 
