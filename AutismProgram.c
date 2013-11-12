@@ -3,7 +3,7 @@
 ******************************************************************************/
 //mode 0 = mobile
 //mode 1 = base
-#define PROGRAM_MODE 1
+#define PROGRAM_MODE 0
 //#define PROGRAM_MODE 1
 #include "AutismProgram.h"
 
@@ -66,12 +66,15 @@ void main( void )
 					{
 						unsigned char * rxData = RadioGetRxBuffer();
 						//check to see if pairing command
-						if(rxData[0] == PACKET_COMMAND_PAIR)
+						if(rxData[0] == PACKET_MOBILE_PAIRING_REQUEST)
 						{
 							//save the base unit identifier
 							baseUnitIdentifier[0] = rxData[1];
 							baseUnitIdentifier[1] = rxData[2];
 							//send a response pkt (make the assumption that it gets the response)
+							BaseUnitSendPairingResponse();
+							programState = ProgramPairAcknowledged;
+							pairingState = PairingComplete;
 						}
 					}
 				}
@@ -85,15 +88,28 @@ void main( void )
 							RadioDisableReceive();
 						//send pairing data
 						MobileUnitSendPairingRequest();
-						while(RadioIsTransmitting())
-							__no_operation();
 						pairingState = PairingWaitingForResponse;
 						break;
 					case PairingWaitingForResponse:
-						//check to se if we got response
+						//check to se if we got response to our pairing request
 						if(RadioIsDataAvailable())
 						{
-							__no_operation();
+							//check to see if we got a pair request
+							const char bytesAvailable = RadioIsDataAvailable();
+							if(bytesAvailable)
+							{
+								unsigned char * rxData = RadioGetRxBuffer();
+								//check to see if pairing command
+								if(rxData[0] == PACKET_BASE_PAIRING_RESPONSE)
+								{
+									//verify base unit identifier is the same
+									if((baseUnitIdentifier[0] == rxData[1]) && (baseUnitIdentifier[1] == rxData[2]))
+									{
+										programState = ProgramPairAcknowledged;
+										pairingState = PairingComplete;
+									}
+								}
+							}
 						}
 
 						break;
@@ -101,7 +117,43 @@ void main( void )
 				}
 			}
 			break;
+		case ProgramPairAcknowledged: //blink LED
+			if(ledBlinkCounter < 5000)
+			{
+				ledBlinkCounter+=deltaTime;
+				if((ledBlinkCounter / 250) % 2 == 0)
+				{
+					SETBIT(P1OUT, BIT0);
+				}
+				else
+					CLEARBIT(P1OUT,BIT0);
+			}
+			else
+			{
+				//turn off LED
+				CLEARBIT(P1OUT,BIT0);
+				//reset blink counter
+				ledBlinkCounter = 0;
+				programState = ProgramRunning;
+			}
+
+			break;
 		case ProgramRunning:
+			//in case we want to pair again
+			if(pairingButton.holdEvent)
+			{
+				pairingButton.holdEvent = 0;
+				pairingModeStartTime = currentTimeMS;
+				programState = ProgramPairing;
+				pairingState = PairingInitializing;
+				SETBIT(P1OUT, BIT0);
+				RadioEnableReceive();
+			}
+
+			if(RadioIsDataAvailable())
+			{
+
+			}
 			break;
 		}
 	__no_operation();
@@ -199,14 +251,36 @@ char GetRandomByte(void)
 //Sends the pairing request to the base station
 void MobileUnitSendPairingRequest()
 {
-	TxBuffer[0] = PACKET_COMMAND_PAIR;
+	if(RadioIsReceiving())
+		RadioDisableReceive();
+
+	TxBuffer[0] = PACKET_MOBILE_PAIRING_REQUEST;
 	baseUnitIdentifier[0] = TxBuffer[1] = GetRandomByte();
 	baseUnitIdentifier[1] = TxBuffer[2] = GetRandomByte();
 	TxBuffer[3] = 0x0;
 	TxBuffer[4] = 0x0;
 	TxBuffer[5] = 0x0;
 	RadioTransmitData( (unsigned char*)TxBuffer, sizeof TxBuffer);
+	//wait for transmission before proceeding
+	while(RadioIsTransmitting())
+		__no_operation();
+	RadioEnableReceive();
 }
 void BaseUnitSendPairingResponse()
 {
+	if(RadioIsReceiving())
+		RadioDisableReceive();
+
+	TxBuffer[0] = PACKET_BASE_PAIRING_RESPONSE;
+	TxBuffer[1] = baseUnitIdentifier[0];
+	TxBuffer[2] = baseUnitIdentifier[1];
+	TxBuffer[3] = 0xFF;
+	TxBuffer[4] = 0xFF;
+	TxBuffer[5] = 0xFF;
+	RadioTransmitData( (unsigned char*)TxBuffer, sizeof TxBuffer);
+
+	while(RadioIsTransmitting())
+		__no_operation();
+
+	RadioEnableReceive();
 }

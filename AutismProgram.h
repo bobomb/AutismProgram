@@ -8,10 +8,16 @@
  */
 #define PAIRING_MODE_TIMEOUT_MS 10000
 //first byte of the mobile send pairing request command
-#define PACKET_COMMAND_PAIR	0x10
-enum  {ProgramInitializing, ProgramIdle, ProgramPairing, ProgramRunning} programState;
+#define PACKET_MOBILE_PAIRING_REQUEST	0x10
+//first byte of the base send pairing response command
+#define PACKET_BASE_PAIRING_RESPONSE	0x1F
+
+/*******************
+ * State enums
+ */
+enum  {ProgramInitializing, ProgramIdle, ProgramPairing, ProgramRunning, ProgramPairAcknowledged} programState;
 enum  {BaseUnit, MobileUnit} programRole;
-enum  {PairingInitializing, PairingWaitingForResponse} pairingState;
+enum  {PairingInitializing, PairingWaitingForResponse, PairingComplete} pairingState;
 
 unsigned char TxBuffer[PACKET_LEN]= {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
 
@@ -26,6 +32,7 @@ volatile unsigned long currentTimeMS = 0;
 volatile unsigned long lastTimeMS = 0;
 //holds the time that pairing started
 unsigned long pairingModeStartTime = 0;
+unsigned long ledBlinkCounter = 0;
 
 /*******************
  * Function Definition
