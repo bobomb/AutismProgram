@@ -7,15 +7,19 @@
  * Variable Definition
  */
 #define PAIRING_MODE_TIMEOUT_MS 10000
+//time to wait between pairing retries
+#define PAIRING_RESPONSE_RETRY_MS 2000
 //first byte of the mobile send pairing request command
 #define PACKET_MOBILE_PAIRING_REQUEST	0x10
 //first byte of the base send pairing response command
 #define PACKET_BASE_PAIRING_RESPONSE	0x1F
+//test data packet
+#define PACKET_MOBILE_TEST_DATA			0x2D
 
 /*******************
  * State enums
  */
-enum  {ProgramInitializing, ProgramIdle, ProgramPairing, ProgramRunning, ProgramPairAcknowledged} programState;
+enum  {ProgramInitializing, ProgramIdle, ProgramPairing, ProgramRunning, ProgramPairAcknowledged, ProgramTestMode} programState;
 enum  {BaseUnit, MobileUnit} programRole;
 enum  {PairingInitializing, PairingWaitingForResponse, PairingComplete} pairingState;
 
@@ -25,7 +29,7 @@ unsigned char packetReceived;
 unsigned char packetTransmit;
 unsigned char baseUnitIdentifier[2];
 
-TButtonInfo pairingButton = {Unpressed,0,0,0,0,0,0,0};
+TButtonInfo pairingButton = {Unpressed,0,0,0,0,0,0,0,0};
 
 //holds the current number of milliseconds (roughly) since start
 volatile unsigned long currentTimeMS = 0;
@@ -40,10 +44,13 @@ unsigned long ledBlinkCounter = 0;
 void InitButtonLeds(void);
 void InitMillisecondTimer();
 void MobileUnitSendPairingRequest();
+void MobileUnitSendTestData(unsigned char byte1,unsigned char byte2,unsigned char byte3);
 void BaseUnitSendPairingResponse();
+
 char GetRandomByte(void);
 char GetRandomBit(void);
-
+//checks to see if the identifier fields in a packet are correct
+char CheckPacketIdentifier(unsigned char * packet);
 
 /*
     while(1)

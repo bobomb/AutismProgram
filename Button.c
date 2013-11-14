@@ -9,64 +9,62 @@
 
 void ButtonUpdate(TButtonInfo * pButton, unsigned long deltaT, char buttonValue)
 {
-	pButton->pressCounter += deltaT;
+	//interrupt triggered, reset button status
+	if(pButton->interruptEvent)
+	{
+		pButton->interruptEvent = 0;
+		pButton->buttonState = Pressed;
+		pButton->pressCounter = 0;
+		pButton->pressEvent = 0;
+		pButton->holdEvent  = 0;
+		pButton->releaseEvent = 0;
+		return;
+	}
+
+	if(pButton->buttonState == Pressed || pButton->buttonState == Debounced || pButton->buttonState == Held)
+		pButton->pressCounter += deltaT;
 
 	switch(pButton->buttonState)
 	{
 	case Pressed:
-		if(pButton->pressCounter >= BUTTON_PRESS_TICKS)
+		if((pButton->pressCounter >= BUTTON_PRESS_TICKS) && !buttonValue) //button is active-low
 		{
-			pButton->pressCounter = 0;
 			pButton->pressEvent = 1;
+			pButton->pressCounter = 0;
 			pButton->buttonState = Debounced;
 			pButton->buttonValue = buttonValue;
 		}
 		break;
 	case Debounced:
-		//if(pButton->pressCounter >= BUTTON_HOLD_TICKS && pButton->buttonValue == buttonValue)
 		if(pButton->pressCounter >= BUTTON_HOLD_TICKS && pButton->buttonValue == buttonValue)
 		{
-			pButton->pressCounter = 0;
 			pButton->holdEvent = 1;
 			pButton->buttonState = Held;
-			pButton->buttonValue = buttonValue;
 		}
-		else if (pButton->buttonValue != buttonValue) //we went from press to debounce, but the button changed...must have been released
+		else if (pButton->buttonValue != buttonValue)
 		{
-			pButton->pressCounter = 0;
-			pButton->pressEvent = 0;
-			pButton->holdEvent = 0;
-			//pButton->releaseEvent = 1;
 			pButton->buttonState = Unpressed;
+			pButton->releaseEvent = 1;
+			//pButton->pressCounter = 0;
 		}
-		break;
-	case Unpressed:
 		break;
 	case Held:
-			pButton->pressEvent = 0;
-			pButton->holdEvent = 0;
-			pButton->buttonState = Unpressed;
-			pButton->buttonValue = buttonValue;
-		break;
-	case DebounceUnpressed:
-		if(pButton->pressCounter >= BUTTON_PRESS_TICKS)
+		if(pButton->buttonValue != buttonValue)
 		{
-			pButton->pressCounter = 0;
 			pButton->releaseEvent = 1;
 			pButton->buttonState = Unpressed;
 		}
 		break;
 	}
+
+
 }
 
-void ButtonSetPressed(TButtonInfo * pButton)
+
+void ButtonClearEvents(TButtonInfo * pButton)
 {
-	if(pButton->buttonState == Unpressed)
-	{
-	pButton->buttonState = Pressed;
 	pButton->pressCounter = 0;
 	pButton->pressEvent = 0;
 	pButton->holdEvent  = 0;
 	pButton->releaseEvent = 0;
-	}
 }

@@ -3,8 +3,8 @@
 ******************************************************************************/
 //mode 0 = mobile
 //mode 1 = base
-#define PROGRAM_MODE 0
-//#define PROGRAM_MODE 1
+#define PROGRAM_MODE 1
+
 #include "AutismProgram.h"
 
 void main( void )
@@ -21,6 +21,7 @@ void main( void )
     else
     	programRole = MobileUnit;
 
+    //programState = ProgramTestMode;
     programState = ProgramIdle;
     //enable interrupts again
     __bis_SR_register( GIE );
@@ -30,12 +31,14 @@ void main( void )
         unsigned long deltaTime = currentTimeMS - lastTimeMS;
         lastTimeMS = currentTimeMS;
 
-		__disable_interrupt();
+		//__disable_interrupt();
 		ButtonUpdate(&pairingButton, deltaTime, P1IN & BIT7);
-		__bis_SR_register( GIE );
+		//__bis_SR_register( GIE );
 
 		switch(programState)
 		{
+		case ProgramTestMode:
+			break;
 		case ProgramIdle:
 			if(pairingButton.holdEvent)
 			{
@@ -71,7 +74,7 @@ void main( void )
 							//save the base unit identifier
 							baseUnitIdentifier[0] = rxData[1];
 							baseUnitIdentifier[1] = rxData[2];
-							//send a response pkt (make the assumption that it gets the response)
+							//send a response packet (make the assumption that it gets the response)
 							BaseUnitSendPairingResponse();
 							programState = ProgramPairAcknowledged;
 							pairingState = PairingComplete;
@@ -150,13 +153,39 @@ void main( void )
 				RadioEnableReceive();
 			}
 
-			if(RadioIsDataAvailable())
+			if(programRole == BaseUnit)
 			{
-
+				const char bytesAvailable = RadioIsDataAvailable();
+				if(bytesAvailable)
+				{
+					unsigned char * rxData = RadioGetRxBuffer();
+					//check to see if test command
+					if(rxData[0] == PACKET_MOBILE_TEST_DATA)
+					{
+						if(CheckPacketIdentifier(rxData))
+						{
+							INVERTBIT(P1OUT, BIT0);
+							//RadioDisableReceive();
+							//RadioEnableReceive();
+						}
+					}
+				}
 			}
+			else if (programRole == MobileUnit)
+			{
+				if(pairingButton.pressEvent)
+				{
+					pairingButton.pressEvent = 0;
+					MobileUnitSendTestData(0x55,0x00,0x00);
+				}
+			}
+
 			break;
 		}
 	__no_operation();
+
+	if(!RadioIsTransmitting())
+		RadioEnableReceive();
     }
 
 }
@@ -216,9 +245,9 @@ __interrupt void PORT1_ISR(void)
     case 12: break;                         // P1.5 IFG
     case 14: break;                         // P1.6 IFG
     case 16:                                // P1.7 IFG
-      //P1IE = 0;                           // Debounce by disabling buttons
-      ButtonSetPressed(&pairingButton);
-      CLEARBIT(P1IFG, BIT7);
+      CLEARBIT(P1IFG, BIT7); //clear the interrupt
+      //set the interrupt event for the pairing button
+      pairingButton.interruptEvent = 1;
       __bic_SR_register_on_exit(LPM3_bits); // Exit active    
       break;
   }
@@ -283,4 +312,31 @@ void BaseUnitSendPairingResponse()
 		__no_operation();
 
 	RadioEnableReceive();
+}
+
+void MobileUnitSendTestData(unsigned char byte1,unsigned char byte2,unsigned char byte3)
+{
+	if(RadioIsReceiving())
+		RadioDisableReceive();
+
+	TxBuffer[0] = PACKET_MOBILE_TEST_DATA;
+	TxBuffer[1] = baseUnitIdentifier[0];
+	TxBuffer[2] = baseUnitIdentifier[1];
+	TxBuffer[3] = byte1;
+	TxBuffer[4] = byte2;
+	TxBuffer[5] = byte3;
+	RadioTransmitData( (unsigned char*)TxBuffer, sizeof TxBuffer);
+
+	while(RadioIsTransmitting())
+		__no_operation();
+
+	RadioEnableReceive();
+}
+
+char CheckPacketIdentifier( unsigned char * packet)
+{
+	if((packet[1] == baseUnitIdentifier[0]) && (packet[2] == baseUnitIdentifier[1]))
+		return 1;
+	else
+		return 0;
 }

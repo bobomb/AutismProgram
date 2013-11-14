@@ -1,10 +1,10 @@
 ******************************************************************************
                   MSP430 Linker PC v4.2.1                      
 ******************************************************************************
->> Linked Mon Nov 11 20:07:09 2013
+>> Linked Wed Nov 13 21:05:02 2013
 
 OUTPUT FILE NAME:   <Fixed_LT_FIFO.out>
-ENTRY POINT SYMBOL: "_c_int00"  address: 00008ba6
+ENTRY POINT SYMBOL: "_c_int00"  address: 00008c24
 
 
 MEMORY CONFIGURATION
@@ -19,7 +19,7 @@ MEMORY CONFIGURATION
   INFOB                 00001900   00000080  00000000  00000080  RWIX
   INFOA                 00001980   00000080  00000000  00000080  RWIX
   RAM                   00001c00   00000ffe  000000aa  00000f54  RWIX
-  FLASH                 00008000   00007f80  00000cba  000072c6  RWIX
+  FLASH                 00008000   00007f80  00000d50  00007230  RWIX
   INT00                 0000ff80   00000002  00000000  00000002  RWIX
   INT01                 0000ff82   00000002  00000000  00000002  RWIX
   INT02                 0000ff84   00000002  00000000  00000002  RWIX
@@ -117,58 +117,59 @@ section   page    origin      length       input sections
                   00002bac    00000002     rts430x_lc_sd_eabi.lib : boot.obj (.stack)
                   00002bae    0000004e     --HOLE--
 
-.text      0    00008000    00000c60     
-                  00008000    000001c8     AutismProgram.obj (.text:main)
-                  000081c8    000001a0     RF1A.obj (.text:WriteRfSettings)
-                  00008368    000000d8     rts430x_lc_sd_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
-                  00008440    000000ca     hal_pmm.obj (.text:SetVCoreUp)
-                  0000850a    0000009c     hal_pmm.obj (.text:SetVCoreDown)
-                  000085a6    00000092     Button.obj (.text:ButtonUpdate)
-                  00008638    0000008e     RF1A.obj (.text:Strobe)
-                  000086c6    00000070     rts430x_lc_sd_eabi.lib : autoinit.obj (.text:_auto_init)
-                  00008736    0000005c     RadioControl.obj (.text:_isr:CC1101_ISR)
-                  00008792    00000058     AutismProgram.obj (.text:MobileUnitSendPairingRequest)
-                  000087ea    00000058     rts430x_lc_sd_eabi.lib : div32u.obj (.text)
-                  00008842    00000048     AutismProgram.obj (.text:BaseUnitSendPairingResponse)
-                  0000888a    00000042     AutismProgram.obj (.text:InitButtonLeds)
-                  000088cc    00000042     RF1A.obj (.text:ReadBurstReg)
-                  0000890e    00000040     hal_pmm.obj (.text:SetVCore)
-                  0000894e    00000040     rts430x_lc_sd_eabi.lib : cpy_util.obj (.text:__memcpy_far)
-                  0000898e    0000003e     RF1A.obj (.text:WriteBurstReg)
-                  000089cc    0000003e     rts430x_lc_sd_eabi.lib : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
-                  00008a0a    0000003c                            : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
-                  00008a46    0000002c     RadioControl.obj (.text:RadioTransmitData)
-                  00008a72    0000002c     RF1A.obj (.text:ReadSingleReg)
-                  00008a9e    00000024     AutismProgram.obj (.text:GetRandomBit)
-                  00008ac2    00000022     RadioControl.obj (.text:RadioDisableReceive)
-                  00008ae4    00000022     RadioControl.obj (.text:RadioPowerSetup)
-                  00008b06    00000022     RF1A.obj (.text:WriteSinglePATable)
-                  00008b28    00000022     AutismProgram.obj (.text:_isr:PORT1_ISR)
-                  00008b4a    00000020     AutismProgram.obj (.text:GetRandomByte)
-                  00008b6a    00000020     RadioControl.obj (.text:RadioEnableReceive)
-                  00008b8a    0000001c     Button.obj (.text:ButtonSetPressed)
-                  00008ba6    0000001a     rts430x_lc_sd_eabi.lib : boot.obj (.text:_isr:_c_int00_noexit)
-                  00008bc0    00000014     AutismProgram.obj (.text:InitMillisecondTimer)
-                  00008bd4    00000014     RadioControl.obj (.text:RadioGetRxBuffer)
-                  00008be8    00000014     RF1A.obj (.text:WriteSingleReg)
-                  00008bfc    00000012     RF1A.obj (.text:ResetRadioCore)
-                  00008c0e    00000010     RadioControl.obj (.text:RadioSetup)
-                  00008c1e    0000000e     rts430x_lc_sd_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
-                  00008c2c    0000000a     AutismProgram.obj (.text:_isr:TIMER1_A0_ISR)
-                  00008c36    0000000a     rts430x_lc_sd_eabi.lib : lsl16.obj (.text)
-                  00008c40    00000006     RadioControl.obj (.text:RadioIsDataAvailable)
-                  00008c46    00000006     RadioControl.obj (.text:RadioIsReceiving)
-                  00008c4c    00000006     RadioControl.obj (.text:RadioIsTransmitting)
-                  00008c52    00000006     rts430x_lc_sd_eabi.lib : isr_trap.obj (.text:__TI_ISR_TRAP)
-                  00008c58    00000004                            : pre_init.obj (.text:_system_pre_init)
-                  00008c5c    00000004                            : exit.obj (.text:abort)
+.text      0    00008000    00000cf6     
+                  00008000    0000020c     AutismProgram.obj (.text:main)
+                  0000820c    000001a0     RF1A.obj (.text:WriteRfSettings)
+                  000083ac    000000d8     rts430x_lc_sd_eabi.lib : copy_decompress_rle.obj (.text:__TI_decompress_rle_core)
+                  00008484    000000ca     hal_pmm.obj (.text:SetVCoreUp)
+                  0000854e    0000009e     Button.obj (.text:ButtonUpdate)
+                  000085ec    0000009c     hal_pmm.obj (.text:SetVCoreDown)
+                  00008688    0000008e     RF1A.obj (.text:Strobe)
+                  00008716    00000070     rts430x_lc_sd_eabi.lib : autoinit.obj (.text:_auto_init)
+                  00008786    0000005c     RadioControl.obj (.text:_isr:CC1101_ISR)
+                  000087e2    00000058     AutismProgram.obj (.text:MobileUnitSendPairingRequest)
+                  0000883a    00000058     rts430x_lc_sd_eabi.lib : div32u.obj (.text)
+                  00008892    00000052     AutismProgram.obj (.text:MobileUnitSendTestData)
+                  000088e4    00000048     AutismProgram.obj (.text:BaseUnitSendPairingResponse)
+                  0000892c    00000042     AutismProgram.obj (.text:InitButtonLeds)
+                  0000896e    00000042     RF1A.obj (.text:ReadBurstReg)
+                  000089b0    00000040     hal_pmm.obj (.text:SetVCore)
+                  000089f0    00000040     rts430x_lc_sd_eabi.lib : cpy_util.obj (.text:__memcpy_far)
+                  00008a30    0000003e     RF1A.obj (.text:WriteBurstReg)
+                  00008a6e    0000003e     rts430x_lc_sd_eabi.lib : copy_zero_init.obj (.text:decompress:ZI:__TI_zero_init)
+                  00008aac    0000003c                            : copy_decompress_none.obj (.text:decompress:none:__TI_decompress_none)
+                  00008ae8    0000002c     RadioControl.obj (.text:RadioTransmitData)
+                  00008b14    0000002c     RF1A.obj (.text:ReadSingleReg)
+                  00008b40    00000024     AutismProgram.obj (.text:GetRandomBit)
+                  00008b64    00000022     RadioControl.obj (.text:RadioDisableReceive)
+                  00008b86    00000022     RadioControl.obj (.text:RadioPowerSetup)
+                  00008ba8    00000022     RF1A.obj (.text:WriteSinglePATable)
+                  00008bca    00000020     AutismProgram.obj (.text:GetRandomByte)
+                  00008bea    00000020     RadioControl.obj (.text:RadioEnableReceive)
+                  00008c0a    0000001a     AutismProgram.obj (.text:_isr:PORT1_ISR)
+                  00008c24    0000001a     rts430x_lc_sd_eabi.lib : boot.obj (.text:_isr:_c_int00_noexit)
+                  00008c3e    00000018     AutismProgram.obj (.text:CheckPacketIdentifier)
+                  00008c56    00000014     AutismProgram.obj (.text:InitMillisecondTimer)
+                  00008c6a    00000014     RadioControl.obj (.text:RadioGetRxBuffer)
+                  00008c7e    00000014     RF1A.obj (.text:WriteSingleReg)
+                  00008c92    00000012     RF1A.obj (.text:ResetRadioCore)
+                  00008ca4    00000010     RadioControl.obj (.text:RadioSetup)
+                  00008cb4    0000000e     rts430x_lc_sd_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24:__TI_decompress_rle24)
+                  00008cc2    0000000a     AutismProgram.obj (.text:_isr:TIMER1_A0_ISR)
+                  00008ccc    0000000a     rts430x_lc_sd_eabi.lib : lsl16.obj (.text)
+                  00008cd6    00000006     RadioControl.obj (.text:RadioIsDataAvailable)
+                  00008cdc    00000006     RadioControl.obj (.text:RadioIsReceiving)
+                  00008ce2    00000006     RadioControl.obj (.text:RadioIsTransmitting)
+                  00008ce8    00000006     rts430x_lc_sd_eabi.lib : isr_trap.obj (.text:__TI_ISR_TRAP)
+                  00008cee    00000004                            : pre_init.obj (.text:_system_pre_init)
+                  00008cf2    00000004                            : exit.obj (.text:abort)
 
-.cinit     0    00008c60    0000005a     
-                  00008c60    00000037     (.cinit..data.load) [load image, compression = rle]
-                  00008c97    00000001     --HOLE-- [fill = 0]
-                  00008c98    0000000c     (__TI_handler_table)
-                  00008ca4    00000006     (.cinit..bss.load) [load image, compression = zero_init]
-                  00008caa    00000010     (__TI_cinit_table)
+.cinit     0    00008cf6    0000005a     
+                  00008cf6    00000037     (.cinit..data.load) [load image, compression = rle]
+                  00008d2d    00000001     --HOLE-- [fill = 0]
+                  00008d2e    0000000c     (__TI_handler_table)
+                  00008d3a    00000006     (.cinit..bss.load) [load image, compression = zero_init]
+                  00008d40    00000010     (__TI_cinit_table)
 
 AES        0    0000ffda    00000002     
                   0000ffda    00000002     rts430x_lc_sd_eabi.lib : int45.obj (.int45)
@@ -234,14 +235,14 @@ SYSNMI     0    0000fffc    00000002
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 00008caa records: 2, size/record: 8, table size: 16
-	.data: load addr=00008c60, load size=00000037 bytes, run addr=00001c00, run size=0000004a bytes, compression=rle
-	.bss: load addr=00008ca4, load size=00000006 bytes, run addr=00001c4a, run size=00000010 bytes, compression=zero_init
+__TI_cinit_table @ 00008d40 records: 2, size/record: 8, table size: 16
+	.data: load addr=00008cf6, load size=00000037 bytes, run addr=00001c00, run size=0000004a bytes, compression=rle
+	.bss: load addr=00008d3a, load size=00000006 bytes, run addr=00001c4a, run size=00000010 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 00008c98 records: 3, size/record: 4, table size: 12
+__TI_handler_table @ 00008d2e records: 3, size/record: 4, table size: 12
 	index: 0, handler: __TI_zero_init
 	index: 1, handler: __TI_decompress_rle24
 	index: 2, handler: __TI_decompress_none
@@ -348,10 +349,9 @@ address    name
 000009c4   AESASTAT
 000009c5   AESASTAT_H
 000009c4   AESASTAT_L
-00008842   BaseUnitSendPairingResponse
-00008b8a   ButtonSetPressed
-000085a6   ButtonUpdate
-00008c5c   C$$EXIT
+000088e4   BaseUnitSendPairingResponse
+0000854e   ButtonUpdate
+00008cf2   C$$EXIT
 000008c0   CBCTL0
 000008c1   CBCTL0_H
 000008c0   CBCTL0_L
@@ -368,7 +368,7 @@ address    name
 000008cd   CBINT_H
 000008cc   CBINT_L
 000008ce   CBIV
-00008736   CC1101_ISR
+00008786   CC1101_ISR
 00000150   CRCDI
 00000152   CRCDIRB
 00000153   CRCDIRB_H
@@ -381,6 +381,7 @@ address    name
 00000156   CRCRESR
 00000157   CRCRESR_H
 00000156   CRCRESR_L
+00008c3e   CheckPacketIdentifier
 00000510   DMA0CTL
 00000511   DMA0CTL_H
 00000510   DMA0CTL_L
@@ -432,10 +433,10 @@ address    name
 00000146   FCTL4
 00000147   FCTL4_H
 00000146   FCTL4_L
-00008a9e   GetRandomBit
-00008b4a   GetRandomByte
-0000888a   InitButtonLeds
-00008bc0   InitMillisecondTimer
+00008b40   GetRandomBit
+00008bca   GetRandomByte
+0000892c   InitButtonLeds
+00008c56   InitMillisecondTimer
 00000a04   LCDBBLKCTL
 00000a05   LCDBBLKCTL_H
 00000a04   LCDBBLKCTL_L
@@ -554,7 +555,8 @@ address    name
 000004c2   MPYS_L
 000004c1   MPY_H
 000004c0   MPY_L
-00008792   MobileUnitSendPairingRequest
+000087e2   MobileUnitSendPairingRequest
+00008892   MobileUnitSendTestData
 000004c8   OP2
 000004e2   OP2H
 000004e3   OP2H_H
@@ -698,7 +700,7 @@ address    name
 0000012e   PMMRIE
 0000012f   PMMRIE_H
 0000012e   PMMRIE_L
-00008b28   PORT1_ISR
+00008c0a   PORT1_ISR
 00000158   RCCTL0
 00000159   RCCTL0_H
 00000158   RCCTL0_L
@@ -826,18 +828,18 @@ address    name
 000004b6   RTCYEAR
 000004b7   RTCYEAR_H
 000004b6   RTCYEAR_L
-00008ac2   RadioDisableReceive
-00008b6a   RadioEnableReceive
-00008bd4   RadioGetRxBuffer
-00008c40   RadioIsDataAvailable
-00008c46   RadioIsReceiving
-00008c4c   RadioIsTransmitting
-00008ae4   RadioPowerSetup
-00008c0e   RadioSetup
-00008a46   RadioTransmitData
-000088cc   ReadBurstReg
-00008a72   ReadSingleReg
-00008bfc   ResetRadioCore
+00008b64   RadioDisableReceive
+00008bea   RadioEnableReceive
+00008c6a   RadioGetRxBuffer
+00008cd6   RadioIsDataAvailable
+00008cdc   RadioIsReceiving
+00008ce2   RadioIsTransmitting
+00008b86   RadioPowerSetup
+00008ca4   RadioSetup
+00008ae8   RadioTransmitData
+0000896e   ReadBurstReg
+00008b14   ReadSingleReg
+00008c92   ResetRadioCore
 00001c4a   RxBuffer
 00001c46   RxBufferLength
 00000100   SFRIE1
@@ -894,10 +896,10 @@ address    name
 0000019a   SYSUNIV
 0000019b   SYSUNIV_H
 0000019a   SYSUNIV_L
-0000890e   SetVCore
-0000850a   SetVCoreDown
-00008440   SetVCoreUp
-00008638   Strobe
+000089b0   SetVCore
+000085ec   SetVCoreDown
+00008484   SetVCoreUp
+00008688   Strobe
 00000352   TA0CCR0
 00000354   TA0CCR1
 00000356   TA0CCR2
@@ -922,7 +924,7 @@ address    name
 000003a0   TA1EX0
 000003ae   TA1IV
 00000390   TA1R
-00008c2c   TIMER1_A0_ISR
+00008cc2   TIMER1_A0_ISR
 00001c40   TxBuffer
 000005d0   UCA0ABCTL
 000005c6   UCA0BRW
@@ -991,22 +993,22 @@ address    name
 0000015c   WDTCTL
 0000015d   WDTCTL_H
 0000015c   WDTCTL_L
-0000898e   WriteBurstReg
-000081c8   WriteRfSettings
-00008b06   WriteSinglePATable
-00008be8   WriteSingleReg
+00008a30   WriteBurstReg
+0000820c   WriteRfSettings
+00008ba8   WriteSinglePATable
+00008c7e   WriteSingleReg
 00002bfc   __STACK_END
 00000050   __STACK_SIZE
-00008caa   __TI_CINIT_Base
-00008cba   __TI_CINIT_Limit
-00008c98   __TI_Handler_Table_Base
-00008ca4   __TI_Handler_Table_Limit
+00008d40   __TI_CINIT_Base
+00008d50   __TI_CINIT_Limit
+00008d2e   __TI_Handler_Table_Base
+00008d3a   __TI_Handler_Table_Limit
 UNDEFED    __TI_INITARRAY_Base
 UNDEFED    __TI_INITARRAY_Limit
-00008c52   __TI_ISR_TRAP
+00008ce8   __TI_ISR_TRAP
 00000001   __TI_args_main
-00008a0a   __TI_decompress_none
-00008c1e   __TI_decompress_rle24
+00008aac   __TI_decompress_none
+00008cb4   __TI_decompress_rle24
 00000001   __TI_exit
 0000ffda   __TI_int45
 0000ffdc   __TI_int46
@@ -1026,20 +1028,20 @@ UNDEFED    __TI_INITARRAY_Limit
 0000fff8   __TI_int60
 0000fffa   __TI_int61
 0000fffc   __TI_int62
-000089cc   __TI_zero_init
+00008a6e   __TI_zero_init
 ffffffff   __binit__
 ffffffff   __c_args__
-0000894e   __memcpy_far
-000087ea   __mspabi_divul
-000087ea   __mspabi_remul
-00008c36   __mspabi_slli
-000086c6   _auto_init
-00008ba6   _c_int00
-00008ba6   _c_int00_noexit
+000089f0   __memcpy_far
+0000883a   __mspabi_divul
+0000883a   __mspabi_remul
+00008ccc   __mspabi_slli
+00008716   _auto_init
+00008c24   _c_int00
+00008c24   _c_int00_noexit
 0000fffe   _reset_vector
 00002bac   _stack
-00008c58   _system_pre_init
-00008c5c   abort
+00008cee   _system_pre_init
+00008cf2   abort
 00001c52   baseUnitIdentifier
 ffffffff   binit
 00001c30   currentTimeMS
@@ -1792,55 +1794,56 @@ address    name
 00002bac   _stack
 00002bfc   __STACK_END
 00008000   main
-000081c8   WriteRfSettings
-00008440   SetVCoreUp
-0000850a   SetVCoreDown
-000085a6   ButtonUpdate
-00008638   Strobe
-000086c6   _auto_init
-00008736   CC1101_ISR
-00008792   MobileUnitSendPairingRequest
-000087ea   __mspabi_divul
-000087ea   __mspabi_remul
-00008842   BaseUnitSendPairingResponse
-0000888a   InitButtonLeds
-000088cc   ReadBurstReg
-0000890e   SetVCore
-0000894e   __memcpy_far
-0000898e   WriteBurstReg
-000089cc   __TI_zero_init
-00008a0a   __TI_decompress_none
-00008a46   RadioTransmitData
-00008a72   ReadSingleReg
-00008a9e   GetRandomBit
-00008ac2   RadioDisableReceive
-00008ae4   RadioPowerSetup
-00008b06   WriteSinglePATable
-00008b28   PORT1_ISR
-00008b4a   GetRandomByte
-00008b6a   RadioEnableReceive
-00008b8a   ButtonSetPressed
-00008ba6   _c_int00
-00008ba6   _c_int00_noexit
-00008bc0   InitMillisecondTimer
-00008bd4   RadioGetRxBuffer
-00008be8   WriteSingleReg
-00008bfc   ResetRadioCore
-00008c0e   RadioSetup
-00008c1e   __TI_decompress_rle24
-00008c2c   TIMER1_A0_ISR
-00008c36   __mspabi_slli
-00008c40   RadioIsDataAvailable
-00008c46   RadioIsReceiving
-00008c4c   RadioIsTransmitting
-00008c52   __TI_ISR_TRAP
-00008c58   _system_pre_init
-00008c5c   C$$EXIT
-00008c5c   abort
-00008c98   __TI_Handler_Table_Base
-00008ca4   __TI_Handler_Table_Limit
-00008caa   __TI_CINIT_Base
-00008cba   __TI_CINIT_Limit
+0000820c   WriteRfSettings
+00008484   SetVCoreUp
+0000854e   ButtonUpdate
+000085ec   SetVCoreDown
+00008688   Strobe
+00008716   _auto_init
+00008786   CC1101_ISR
+000087e2   MobileUnitSendPairingRequest
+0000883a   __mspabi_divul
+0000883a   __mspabi_remul
+00008892   MobileUnitSendTestData
+000088e4   BaseUnitSendPairingResponse
+0000892c   InitButtonLeds
+0000896e   ReadBurstReg
+000089b0   SetVCore
+000089f0   __memcpy_far
+00008a30   WriteBurstReg
+00008a6e   __TI_zero_init
+00008aac   __TI_decompress_none
+00008ae8   RadioTransmitData
+00008b14   ReadSingleReg
+00008b40   GetRandomBit
+00008b64   RadioDisableReceive
+00008b86   RadioPowerSetup
+00008ba8   WriteSinglePATable
+00008bca   GetRandomByte
+00008bea   RadioEnableReceive
+00008c0a   PORT1_ISR
+00008c24   _c_int00
+00008c24   _c_int00_noexit
+00008c3e   CheckPacketIdentifier
+00008c56   InitMillisecondTimer
+00008c6a   RadioGetRxBuffer
+00008c7e   WriteSingleReg
+00008c92   ResetRadioCore
+00008ca4   RadioSetup
+00008cb4   __TI_decompress_rle24
+00008cc2   TIMER1_A0_ISR
+00008ccc   __mspabi_slli
+00008cd6   RadioIsDataAvailable
+00008cdc   RadioIsReceiving
+00008ce2   RadioIsTransmitting
+00008ce8   __TI_ISR_TRAP
+00008cee   _system_pre_init
+00008cf2   C$$EXIT
+00008cf2   abort
+00008d2e   __TI_Handler_Table_Base
+00008d3a   __TI_Handler_Table_Limit
+00008d40   __TI_CINIT_Base
+00008d50   __TI_CINIT_Limit
 0000ffda   __TI_int45
 0000ffdc   __TI_int46
 0000ffde   __TI_int47
@@ -1866,4 +1869,4 @@ ffffffff   binit
 UNDEFED    __TI_INITARRAY_Base
 UNDEFED    __TI_INITARRAY_Limit
 
-[804 symbols]
+[805 symbols]
