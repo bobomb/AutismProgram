@@ -28,11 +28,11 @@ void main( void )
 
     while (1)
     {
-        unsigned long deltaTime = currentTimeMS - lastTimeMS;
-        lastTimeMS = currentTimeMS;
+        g_deltaTime = g_currentTimeMS - g_lastTimeMS;
+        g_lastTimeMS = g_currentTimeMS;
 
 		//__disable_interrupt();
-		ButtonUpdate(&pairingButton, deltaTime, P1IN & BIT7);
+		ButtonUpdate(&pairingButton, g_deltaTime, P1IN & BIT7);
 		//__bis_SR_register( GIE );
 
 		switch(programState)
@@ -43,7 +43,7 @@ void main( void )
 			if(pairingButton.holdEvent)
 			{
 				pairingButton.holdEvent = 0;
-				pairingModeStartTime = currentTimeMS;
+				g_pairingModeStartTime = g_currentTimeMS;
 				programState = ProgramPairing;
 				pairingState = PairingInitializing;
 				SETBIT(P1OUT, BIT0);
@@ -51,7 +51,7 @@ void main( void )
 			}
 			break;
 		case ProgramPairing:
-			if(currentTimeMS - pairingModeStartTime > PAIRING_MODE_TIMEOUT_MS)
+			if(g_currentTimeMS - g_pairingModeStartTime > PAIRING_MODE_TIMEOUT_MS)
 			{
 				//pairing mode timeout
 				CLEARBIT(P1OUT, BIT0);
@@ -62,91 +62,20 @@ void main( void )
 			else
 			{
 				if(programRole == BaseUnit)
-				{
-					//check to see if we got a pair request
-					const char bytesAvailable = RadioIsDataAvailable();
-					if(bytesAvailable)
-					{
-						unsigned char * rxData = RadioGetRxBuffer();
-						//check to see if pairing command
-						if(rxData[0] == PACKET_MOBILE_PAIRING_REQUEST)
-						{
-							//save the base unit identifier
-							baseUnitIdentifier[0] = rxData[1];
-							baseUnitIdentifier[1] = rxData[2];
-							//send a response packet (make the assumption that it gets the response)
-							BaseUnitSendPairingResponse();
-							programState = ProgramPairAcknowledged;
-							pairingState = PairingComplete;
-						}
-					}
-				}
+					State_ProgramPairing_BaseUnit();
 				else if(programRole == MobileUnit)
-				{
-					switch(pairingState)
-					{
-					case PairingInitializing:
-						//disable rcv
-						if(RadioIsReceiving())
-							RadioDisableReceive();
-						//send pairing data
-						MobileUnitSendPairingRequest();
-						pairingState = PairingWaitingForResponse;
-						break;
-					case PairingWaitingForResponse:
-						//check to se if we got response to our pairing request
-						if(RadioIsDataAvailable())
-						{
-							//check to see if we got a pair request
-							const char bytesAvailable = RadioIsDataAvailable();
-							if(bytesAvailable)
-							{
-								unsigned char * rxData = RadioGetRxBuffer();
-								//check to see if pairing command
-								if(rxData[0] == PACKET_BASE_PAIRING_RESPONSE)
-								{
-									//verify base unit identifier is the same
-									if((baseUnitIdentifier[0] == rxData[1]) && (baseUnitIdentifier[1] == rxData[2]))
-									{
-										programState = ProgramPairAcknowledged;
-										pairingState = PairingComplete;
-									}
-								}
-							}
-						}
-
-						break;
-					}
-				}
+					State_ProgramPairing_MobileUnit();
 			}
 			break;
 		case ProgramPairAcknowledged: //blink LED
-			if(ledBlinkCounter < 5000)
-			{
-				ledBlinkCounter+=deltaTime;
-				if((ledBlinkCounter / 250) % 2 == 0)
-				{
-					SETBIT(P1OUT, BIT0);
-				}
-				else
-					CLEARBIT(P1OUT,BIT0);
-			}
-			else
-			{
-				//turn off LED
-				CLEARBIT(P1OUT,BIT0);
-				//reset blink counter
-				ledBlinkCounter = 0;
-				programState = ProgramRunning;
-			}
-
+			State_ProgramPairAcknowledged();
 			break;
 		case ProgramRunning:
 			//in case we want to pair again
 			if(pairingButton.holdEvent)
 			{
 				pairingButton.holdEvent = 0;
-				pairingModeStartTime = currentTimeMS;
+				g_pairingModeStartTime = g_currentTimeMS;
 				programState = ProgramPairing;
 				pairingState = PairingInitializing;
 				SETBIT(P1OUT, BIT0);
@@ -154,31 +83,9 @@ void main( void )
 			}
 
 			if(programRole == BaseUnit)
-			{
-				const char bytesAvailable = RadioIsDataAvailable();
-				if(bytesAvailable)
-				{
-					unsigned char * rxData = RadioGetRxBuffer();
-					//check to see if test command
-					if(rxData[0] == PACKET_MOBILE_TEST_DATA)
-					{
-						if(CheckPacketIdentifier(rxData))
-						{
-							INVERTBIT(P1OUT, BIT0);
-							//RadioDisableReceive();
-							//RadioEnableReceive();
-						}
-					}
-				}
-			}
+				State_ProgramRunning_BaseUnit();
 			else if (programRole == MobileUnit)
-			{
-				if(pairingButton.pressEvent)
-				{
-					pairingButton.pressEvent = 0;
-					MobileUnitSendTestData(0x55,0x00,0x00);
-				}
-			}
+				State_ProgramRunning_MobileUnit();
 
 			break;
 		}
@@ -228,7 +135,7 @@ void InitMillisecondTimer()
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void TIMER1_A0_ISR(void)
 {
-	currentTimeMS++;
+	g_currentTimeMS++;
 }
 
 #pragma vector=PORT1_VECTOR
@@ -277,6 +184,7 @@ char GetRandomByte(void)
 
 	return randomNum;
 }
+
 //Sends the pairing request to the base station
 void MobileUnitSendPairingRequest()
 {
@@ -284,8 +192,8 @@ void MobileUnitSendPairingRequest()
 		RadioDisableReceive();
 
 	TxBuffer[0] = PACKET_MOBILE_PAIRING_REQUEST;
-	baseUnitIdentifier[0] = TxBuffer[1] = GetRandomByte();
-	baseUnitIdentifier[1] = TxBuffer[2] = GetRandomByte();
+	unitIdentifier[0] = TxBuffer[1] = GetRandomByte();
+	unitIdentifier[1] = TxBuffer[2] = GetRandomByte();
 	TxBuffer[3] = 0x0;
 	TxBuffer[4] = 0x0;
 	TxBuffer[5] = 0x0;
@@ -301,8 +209,8 @@ void BaseUnitSendPairingResponse()
 		RadioDisableReceive();
 
 	TxBuffer[0] = PACKET_BASE_PAIRING_RESPONSE;
-	TxBuffer[1] = baseUnitIdentifier[0];
-	TxBuffer[2] = baseUnitIdentifier[1];
+	TxBuffer[1] = unitIdentifier[0];
+	TxBuffer[2] = unitIdentifier[1];
 	TxBuffer[3] = 0xFF;
 	TxBuffer[4] = 0xFF;
 	TxBuffer[5] = 0xFF;
@@ -320,8 +228,8 @@ void MobileUnitSendTestData(unsigned char byte1,unsigned char byte2,unsigned cha
 		RadioDisableReceive();
 
 	TxBuffer[0] = PACKET_MOBILE_TEST_DATA;
-	TxBuffer[1] = baseUnitIdentifier[0];
-	TxBuffer[2] = baseUnitIdentifier[1];
+	TxBuffer[1] = unitIdentifier[0];
+	TxBuffer[2] = unitIdentifier[1];
 	TxBuffer[3] = byte1;
 	TxBuffer[4] = byte2;
 	TxBuffer[5] = byte3;
@@ -335,8 +243,120 @@ void MobileUnitSendTestData(unsigned char byte1,unsigned char byte2,unsigned cha
 
 char CheckPacketIdentifier( unsigned char * packet)
 {
-	if((packet[1] == baseUnitIdentifier[0]) && (packet[2] == baseUnitIdentifier[1]))
+	if((packet[1] == unitIdentifier[0]) && (packet[2] == unitIdentifier[1]))
 		return 1;
 	else
 		return 0;
+}
+
+void State_ProgramPairing_MobileUnit()
+{
+	switch(pairingState)
+	{
+	case PairingInitializing:
+		//disable rcv
+		if(RadioIsReceiving())
+			RadioDisableReceive();
+		//send pairing data
+		MobileUnitSendPairingRequest();
+		pairingState = PairingWaitingForResponse;
+		break;
+	case PairingWaitingForResponse:
+		//check to se if we got response to our pairing request
+		if(RadioIsDataAvailable())
+		{
+			//check to see if we got a pair request
+			const char bytesAvailable = RadioIsDataAvailable();
+			if(bytesAvailable)
+			{
+				unsigned char * rxData = RadioGetRxBuffer();
+				//check to see if pairing command
+				if(rxData[0] == PACKET_BASE_PAIRING_RESPONSE)
+				{
+					//verify base unit identifier is the same
+					if((unitIdentifier[0] == rxData[1]) && (unitIdentifier[1] == rxData[2]))
+					{
+						programState = ProgramPairAcknowledged;
+						pairingState = PairingComplete;
+					}
+				}
+			}
+		}
+
+		break;
+	}
+}
+
+void State_ProgramPairing_BaseUnit()
+{
+	//check to see if we got a pair request
+	const char bytesAvailable = RadioIsDataAvailable();
+	if(bytesAvailable)
+	{
+		unsigned char * rxData = RadioGetRxBuffer();
+		//check to see if pairing command
+		if(rxData[0] == PACKET_MOBILE_PAIRING_REQUEST)
+		{
+			//save the base unit identifier
+			unitIdentifier[0] = rxData[1];
+			unitIdentifier[1] = rxData[2];
+			//send a response packet (make the assumption that it gets the response)
+			BaseUnitSendPairingResponse();
+			programState = ProgramPairAcknowledged;
+			pairingState = PairingComplete;
+		}
+	}
+}
+
+void State_ProgramPairAcknowledged()
+{
+	//counter is less than 5 seconds
+	if(g_ledBlinkCounter < 5000)
+	{
+		//add the elapsed time since the last call
+		g_ledBlinkCounter+=g_deltaTime;
+		//step function, divide by 250 and check to see if its even, if so then turn light on, if not then turn it off
+		//since division returns the integer part this acts as a step function
+		if((g_ledBlinkCounter / 250) % 2 == 0)
+		{
+			SETBIT(P1OUT, BIT0);
+		}
+		else
+			CLEARBIT(P1OUT,BIT0);
+	}
+	else //timer has elapsed
+	{
+		//turn off LED
+		CLEARBIT(P1OUT,BIT0);
+		//reset blink counter
+		g_ledBlinkCounter = 0;
+		programState = ProgramRunning;
+	}
+}
+
+void State_ProgramRunning_MobileUnit()
+{
+	if(pairingButton.pressEvent)
+	{
+		pairingButton.pressEvent = 0;
+		MobileUnitSendTestData(0x55,0x00,0x00);
+	}
+}
+void State_ProgramRunning_BaseUnit()
+{
+	const char bytesAvailable = RadioIsDataAvailable();
+	if(bytesAvailable)
+	{
+		unsigned char * rxData = RadioGetRxBuffer();
+		//check to see if test command
+		if(rxData[0] == PACKET_MOBILE_TEST_DATA)
+		{
+			if(CheckPacketIdentifier(rxData))
+			{
+				INVERTBIT(P1OUT, BIT0);
+				//RadioDisableReceive();
+				//RadioEnableReceive();
+			}
+		}
+	}
 }
