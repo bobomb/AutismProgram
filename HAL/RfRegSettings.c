@@ -66,7 +66,7 @@ RF_SETTINGS rfSettings = {
     0x04,   // PKTCTRL1  Packet automation control.
     0x04,   // PKTCTRL0  Packet automation control.
     0x00,   // ADDR      Device address.
-    0x06    // PKTLEN    Packet length.
+    0x0C    // PKTLEN    Packet length.
 };
 
 #elif defined MHZ_868
@@ -134,7 +134,7 @@ RF_SETTINGS rfSettings = {
     0x04,   // PKTCTRL1  Packet automation control.
     0x04,   // PKTCTRL0  Packet automation control.
     0x00,   // ADDR      Device address.
-    0x06    // PKTLEN    Packet length.
+    0x0C    // PKTLEN    Packet length.
 };
 
 #endif

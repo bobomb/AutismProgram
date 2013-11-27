@@ -15,6 +15,7 @@ unsigned char RxBufferLength = 0;
 unsigned char transmitting = 0;
 unsigned char receiving = 0;
 unsigned char data_available = 0;
+unsigned char radioRxUpdate = 0;
 
 void RadioSetup()
 {
@@ -40,6 +41,7 @@ void RadioPowerSetup(void)
 
 void RadioTransmitData(unsigned char *buffer, unsigned char length)
 {
+	__disable_interrupt();
   RF1AIES |= BIT9;
   RF1AIFG &= ~BIT9;                         // Clear pending interrupts
   RF1AIE |= BIT9;                           // Enable TX end-of-packet interrupt
@@ -49,10 +51,12 @@ void RadioTransmitData(unsigned char *buffer, unsigned char length)
   Strobe( RF_STX );                         // Strobe STX
   //enable transmit flag
   transmitting = 1;
+  __enable_interrupt();
 }
 
 void RadioEnableReceive(void)
 {
+
   RF1AIES |= BIT9;                          // Falling edge of RFIFG9
   RF1AIFG &= ~BIT9;                         // Clear a pending interrupt
   RF1AIE  |= BIT9;                          // Enable the interrupt
@@ -61,10 +65,12 @@ void RadioEnableReceive(void)
   Strobe( RF_SRX );
   //set receiving flat to true
   receiving = 1;
+
 }
 
 void RadioDisableReceive(void)
 {
+
   RF1AIE &= ~BIT9;                          // Disable RX interrupts
   RF1AIFG &= ~BIT9;                         // Clear pending IFG
 
@@ -75,6 +81,7 @@ void RadioDisableReceive(void)
   Strobe( RF_SFRX  );
   //set receiving flag to false
   receiving = 0;
+
 }
 
 unsigned char * RadioGetRxBuffer()
@@ -103,6 +110,35 @@ unsigned char RadioIsDataAvailable()
 	return data_available;
 }
 
+void RadioUpdate()
+{
+	int k;
+	if(radioRxUpdate)
+	{
+		// Read the length byte from the FIFO
+		RxBufferLength = ReadSingleReg( RXBYTES );
+		if(RxBufferLength <=14)
+			ReadBurstReg(RF_RXFIFORD, RxBuffer, RxBufferLength);
+		else
+		{
+			for( k = 0; k <= RxBufferLength; k+=14)
+			{
+				ReadBurstReg(RF_RXFIFORD, RxBuffer, 14);
+			}
+		}
+
+		// Stop here to see contents of RxBuffer
+		__no_operation();
+
+		// Check the CRC results
+		if(RxBuffer[CRC_LQI_IDX] & CRC_OK)
+		{
+		  //P1OUT ^= BIT0;                    // Toggle LED1
+		  data_available = RxBufferLength;
+		}
+		radioRxUpdate = 0;
+	}
+}
 #pragma vector=CC1101_VECTOR
 __interrupt void CC1101_ISR(void)
 {
@@ -121,19 +157,7 @@ __interrupt void CC1101_ISR(void)
     case 20:                                // RFIFG9
       if(receiving)			    // RX end of packet
       {
-        // Read the length byte from the FIFO
-        RxBufferLength = ReadSingleReg( RXBYTES );
-        ReadBurstReg(RF_RXFIFORD, RxBuffer, RxBufferLength);
-
-        // Stop here to see contents of RxBuffer
-        __no_operation();
-
-        // Check the CRC results
-        if(RxBuffer[CRC_LQI_IDX] & CRC_OK)
-        {
-          //P1OUT ^= BIT0;                    // Toggle LED1
-          data_available = RxBufferLength;
-        }
+    	  radioRxUpdate = 1;
       }
       else if(transmitting)		    // TX end of packet
       {
@@ -150,5 +174,5 @@ __interrupt void CC1101_ISR(void)
     case 30: break;                         // RFIFG14
     case 32: break;                         // RFIFG15
   }
-  __bic_SR_register_on_exit(LPM3_bits); //Go back to low-power mode
+  __bic_SR_register_on_exit(LPM3_bits); //clear LPM3 if set
 }
